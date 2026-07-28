@@ -4,6 +4,13 @@ let generatedPDF = null;
 let currentLang = 'ar';
 const { jsPDF } = window.jspdf;
 
+// ===== PDF Reader Globals =====
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 0;
+let pdfScale = 1.5;
+let pdfFileName = '';
+
 // ===== Translations =====
 const i18n = {
     ar: {
@@ -34,7 +41,15 @@ const i18n = {
         pdfCoverLabel: 'الغلاف',
         pdfContentLabel: 'المحتوى',
         pdfFooter: 'إيثار',
-        langName: 'العربية'
+        langName: 'العربية',
+        pdfReader: 'قارئ PDF',
+        backHome: 'الرئيسية',
+        pdfReaderTitle: 'قارئ ملفات PDF',
+        readerUploadTitle: 'ارفع ملف PDF',
+        readerUploadDesc: 'اسحب الملف هنا أو اضغط لاختياره من جهازك',
+        notifyPDFType: 'الملف يجب أن يكون PDF',
+        notifyPDFLoadError: 'تعذر تحميل ملف PDF',
+        notifyPDFPageError: 'تعذر عرض الصفحة'
     },
     en: {
         tagline: 'Convert your images and text into elegant PDF files',
@@ -64,7 +79,15 @@ const i18n = {
         pdfCoverLabel: 'Cover',
         pdfContentLabel: 'Content',
         pdfFooter: 'Eithar',
-        langName: 'English'
+        langName: 'English',
+        pdfReader: 'PDF Reader',
+        backHome: 'Home',
+        pdfReaderTitle: 'PDF File Reader',
+        readerUploadTitle: 'Upload PDF File',
+        readerUploadDesc: 'Drag the file here or click to select from your device',
+        notifyPDFType: 'File must be a PDF',
+        notifyPDFLoadError: 'Failed to load PDF file',
+        notifyPDFPageError: 'Failed to render page'
     },
     ru: {
         tagline: 'Преобразуйте изображения и текст в элегантные PDF-файлы',
@@ -94,7 +117,15 @@ const i18n = {
         pdfCoverLabel: 'Обложка',
         pdfContentLabel: 'Содержимое',
         pdfFooter: 'Eithar',
-        langName: 'Русский'
+        langName: 'Русский',
+        pdfReader: 'PDF Reader',
+        backHome: 'Главная',
+        pdfReaderTitle: 'Чтение PDF файлов',
+        readerUploadTitle: 'Загрузите PDF файл',
+        readerUploadDesc: 'Перетащите файл сюда или нажмите для выбора',
+        notifyPDFType: 'Файл должен быть PDF',
+        notifyPDFLoadError: 'Не удалось загрузить PDF файл',
+        notifyPDFPageError: 'Не удалось отобразить страницу'
     },
     zh: {
         tagline: '将您的图像和文本转换为精美的 PDF 文件',
@@ -124,7 +155,15 @@ const i18n = {
         pdfCoverLabel: '封面',
         pdfContentLabel: '内容',
         pdfFooter: 'Eithar',
-        langName: '中文'
+        langName: '中文',
+        pdfReader: 'PDF 阅读器',
+        backHome: '首页',
+        pdfReaderTitle: 'PDF 文件阅读器',
+        readerUploadTitle: '上传 PDF 文件',
+        readerUploadDesc: '将文件拖放到此处或点击从设备中选择',
+        notifyPDFType: '文件必须是 PDF',
+        notifyPDFLoadError: '无法加载 PDF 文件',
+        notifyPDFPageError: '无法渲染页面'
     },
     ja: {
         tagline: '画像とテキストをエレガントなPDFファイルに変換',
@@ -154,7 +193,15 @@ const i18n = {
         pdfCoverLabel: '表紙',
         pdfContentLabel: '内容',
         pdfFooter: 'Eithar',
-        langName: '日本語'
+        langName: '日本語',
+        pdfReader: 'PDFリーダー',
+        backHome: 'ホーム',
+        pdfReaderTitle: 'PDFファイルリーダー',
+        readerUploadTitle: 'PDFファイルをアップロード',
+        readerUploadDesc: 'ファイルをここにドラッグするか、クリックしてデバイスから選択',
+        notifyPDFType: 'ファイルはPDFである必要があります',
+        notifyPDFLoadError: 'PDFファイルの読み込みに失敗しました',
+        notifyPDFPageError: 'ページの表示に失敗しました'
     },
     id: {
         tagline: 'Ubah gambar dan teks Anda menjadi file PDF yang elegan',
@@ -184,12 +231,33 @@ const i18n = {
         pdfCoverLabel: 'Sampul',
         pdfContentLabel: 'Konten',
         pdfFooter: 'Eithar',
-        langName: 'Indonesia'
+        langName: 'Indonesia',
+        pdfReader: 'Pembaca PDF',
+        backHome: 'Beranda',
+        pdfReaderTitle: 'Pembaca File PDF',
+        readerUploadTitle: 'Unggah File PDF',
+        readerUploadDesc: 'Seret file ke sini atau klik untuk memilih dari perangkat Anda',
+        notifyPDFType: 'File harus berupa PDF',
+        notifyPDFLoadError: 'Gagal memuat file PDF',
+        notifyPDFPageError: 'Gagal merender halaman'
     }
 };
 
 function t(key) {
     return i18n[currentLang]?.[key] || i18n['en'][key] || key;
+}
+
+// ===== Page Navigation =====
+function showHomePage() {
+    document.getElementById('homePage').classList.remove('hidden');
+    document.getElementById('readerPage').classList.add('hidden');
+    document.title = 'إيثار | محول المخطوطات';
+}
+
+function showReaderPage() {
+    document.getElementById('homePage').classList.add('hidden');
+    document.getElementById('readerPage').classList.remove('hidden');
+    document.title = 'إيثار | قارئ PDF';
 }
 
 // ===== Language System =====
@@ -233,6 +301,14 @@ function setLang(lang) {
     document.getElementById('currentLangLabel').textContent = i18n[lang].langName;
     closeLangMenu();
     updatePreview();
+    updateReaderDirection();
+}
+
+function updateReaderDirection() {
+    const readerPage = document.getElementById('readerPage');
+    if (readerPage) {
+        readerPage.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+    }
 }
 
 function toggleLangMenu() {
@@ -677,6 +753,201 @@ function downloadPDF() {
     showNotification(t('notifyDownload'), 'success');
     createConfetti();
 }
+
+/* =========================================================================
+   PDF READER ENGINE — PDF.js
+   ========================================================================= */
+
+const readerUploadBox = document.getElementById('readerUploadBox');
+const readerFileInput = document.getElementById('readerFileInput');
+const readerUploadArea = document.getElementById('readerUploadArea');
+const readerViewer = document.getElementById('readerViewer');
+const pdfCanvas = document.getElementById('pdfCanvas');
+const currentPageNumEl = document.getElementById('currentPageNum');
+const totalPagesEl = document.getElementById('totalPages');
+const zoomLevelEl = document.getElementById('zoomLevel');
+const readerDocNameEl = document.getElementById('readerDocName');
+const prevPageBtn = document.getElementById('prevPageBtn');
+const nextPageBtn = document.getElementById('nextPageBtn');
+
+// Set PDF.js worker
+if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// Upload handlers
+if (readerUploadBox) {
+    readerUploadBox.addEventListener('click', () => readerFileInput.click());
+    readerUploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        readerUploadBox.classList.add('dragover');
+    });
+    readerUploadBox.addEventListener('dragleave', () => {
+        readerUploadBox.classList.remove('dragover');
+    });
+    readerUploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        readerUploadBox.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            handlePDFFile(e.dataTransfer.files[0]);
+        }
+    });
+}
+
+if (readerFileInput) {
+    readerFileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handlePDFFile(e.target.files[0]);
+        }
+    });
+}
+
+function handlePDFFile(file) {
+    if (file.type !== 'application/pdf') {
+        showNotification(t('notifyPDFType'), 'error');
+        return;
+    }
+
+    pdfFileName = file.name.replace(/\.pdf$/i, '');
+    if (readerDocNameEl) {
+        readerDocNameEl.textContent = pdfFileName;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        try {
+            const typedArray = new Uint8Array(e.target.result);
+            pdfDoc = await pdfjsLib.getDocument({ data: typedArray }).promise;
+            totalPages = pdfDoc.numPages;
+            currentPage = 1;
+            pdfScale = 1.5;
+
+            if (readerUploadArea) readerUploadArea.style.display = 'none';
+            if (readerViewer) readerViewer.classList.add('active');
+
+            updatePageInfo();
+            await renderPage(currentPage);
+        } catch (err) {
+            console.error('PDF load error:', err);
+            showNotification(t('notifyPDFLoadError'), 'error');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+async function renderPage(num) {
+    if (!pdfDoc) return;
+
+    try {
+        const page = await pdfDoc.getPage(num);
+        const viewport = page.getViewport({ scale: pdfScale });
+
+        const canvas = pdfCanvas;
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+        };
+
+        await page.render(renderContext).promise;
+        updatePageInfo();
+        updateZoomDisplay();
+    } catch (err) {
+        console.error('Page render error:', err);
+        showNotification(t('notifyPDFPageError'), 'error');
+    }
+}
+
+function updatePageInfo() {
+    if (currentPageNumEl) currentPageNumEl.textContent = currentPage;
+    if (totalPagesEl) totalPagesEl.textContent = totalPages;
+    if (prevPageBtn) prevPageBtn.disabled = currentPage <= 1;
+    if (nextPageBtn) nextPageBtn.disabled = currentPage >= totalPages;
+}
+
+function updateZoomDisplay() {
+    if (zoomLevelEl) zoomLevelEl.textContent = Math.round(pdfScale * 100) + '%';
+}
+
+function prevPage() {
+    if (currentPage <= 1) return;
+    currentPage--;
+    renderPage(currentPage);
+}
+
+function nextPage() {
+    if (currentPage >= totalPages) return;
+    currentPage++;
+    renderPage(currentPage);
+}
+
+function zoomIn() {
+    pdfScale = Math.min(pdfScale + 0.25, 4.0);
+    renderPage(currentPage);
+}
+
+function zoomOut() {
+    pdfScale = Math.max(pdfScale - 0.25, 0.5);
+    renderPage(currentPage);
+}
+
+function fitToWidth() {
+    if (!pdfDoc || !pdfCanvas) return;
+    const containerWidth = document.getElementById('readerCanvasWrap').clientWidth - 60;
+    pdfDoc.getPage(currentPage).then(page => {
+        const viewport = page.getViewport({ scale: 1 });
+        pdfScale = containerWidth / viewport.width;
+        if (pdfScale < 0.5) pdfScale = 0.5;
+        if (pdfScale > 4.0) pdfScale = 4.0;
+        renderPage(currentPage);
+    });
+}
+
+function closePDF() {
+    pdfDoc = null;
+    currentPage = 1;
+    totalPages = 0;
+    pdfScale = 1.5;
+    pdfFileName = '';
+
+    if (readerUploadArea) readerUploadArea.style.display = 'flex';
+    if (readerViewer) readerViewer.classList.remove('active');
+    if (readerDocNameEl) readerDocNameEl.textContent = t('pdfReaderTitle');
+    if (readerFileInput) readerFileInput.value = '';
+
+    const canvas = pdfCanvas;
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = 0;
+        canvas.height = 0;
+    }
+}
+
+// Keyboard navigation for PDF reader
+document.addEventListener('keydown', (e) => {
+    if (document.getElementById('readerPage').classList.contains('hidden')) return;
+    if (!pdfDoc) return;
+
+    if (e.key === 'ArrowLeft') {
+        if (currentLang === 'ar') nextPage(); else prevPage();
+    } else if (e.key === 'ArrowRight') {
+        if (currentLang === 'ar') prevPage(); else nextPage();
+    } else if (e.key === '+' || e.key === '=') {
+        zoomIn();
+    } else if (e.key === '-') {
+        zoomOut();
+    } else if (e.key === 'Home') {
+        currentPage = 1;
+        renderPage(currentPage);
+    } else if (e.key === 'End') {
+        currentPage = totalPages;
+        renderPage(currentPage);
+    }
+});
 
 // ===== Notification =====
 function showNotification(msg, type) {
