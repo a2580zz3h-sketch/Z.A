@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إيثار | محول المخطوطات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Sans:wght@400;700&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Sans+SC:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ambient-glow"></div>
+    <div class="grid-bg"></div>
+
+    <div class="modal-overlay" id="devModal">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeDevModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <div class="modal-avatar">
+                <div class="avatar-ring"><span>𝐿𝑂𝑅𝐷</span></div>
+            </div>
+            <h2 class="modal-name">𝐿𝑂𝑅𝐷</h2>
+            <p class="modal-desc" data-i18n="devDesc">مطور برمجي خبير في بناء ملفات متعددة مثل المواقع والملفات والبوتات — تلجرام وواتساب. يحب القراءة ويحب الهدوء.</p>
+            <a href="https://wa.me/+201035880919/?text=الـسـلام+عـلـيـكم+سـجـلـني+(اسمك/لقبك)+سـجـلـتك+لـورد" target="_blank" class="dev-contact-btn">
+                <span data-i18n="contactLord">تواصل مع LORD</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="top-bar">
+            <button class="top-btn" onclick="openDevModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span data-i18n="developer">المطور</span>
+            </button>
+            <div class="lang-dropdown" id="langDropdown">
+                <button class="top-btn lang-toggle" onclick="toggleLangMenu()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    <span id="currentLangLabel">العربية</span>
+                </button>
+                <div class="lang-menu" id="langMenu">
+                    <button onclick="setLang('ar')" class="lang-item active" data-lang="ar">🇪🇬 العربية</button>
+                    <button onclick="setLang('en')" class="lang-item" data-lang="en">🇺🇸 English</button>
+                    <button onclick="setLang('ru')" class="lang-item" data-lang="ru">🇷🇺 Русский</button>
+                    <button onclick="setLang('zh')" class="lang-item" data-lang="zh">🇨🇳 中文</button>
+                    <button onclick="setLang('ja')" class="lang-item" data-lang="ja">🇯🇵 日本語</button>
+                    <button onclick="setLang('id')" class="lang-item" data-lang="id">🇮🇩 Indonesia</button>
+                </div>
+            </div>
+        </div>
+
+        <header class="site-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                </div>
+                <h1>إيثار</h1>
+            </div>
+            <p class="tagline" data-i18n="tagline">حوّل صورك ونصوصك إلى ملفات PDF بأناقة</p>
+        </header>
+
+        <main class="content-area">
+            <div class="input-panel">
+                <div class="input-group">
+                    <label data-i18n="filenameLabel">اسم الملف</label>
+                    <input type="text" id="filenameInput" value="مخطوطة_إيثار">
+                </div>
+
+                <div class="input-group">
+                    <label data-i18n="textLabel">النص</label>
+                    <textarea id="textInput" rows="8" placeholder="اكتب نصك هنا..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label data-i18n="coverLabel">صورة الغلاف الخارجي</label>
+                    <div class="upload-zone" id="coverUploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <p data-i18n="coverUploadText">اسحب صورة الغلاف هنا أو <span data-i18n="clickSelect">اضغط للاختيار</span></p>
+                            <small data-i18n="coverHint">هذه الصورة تظهر في صفحة الغلاف الأولى</small>
+                        </div>
+                        <input type="file" id="coverImageInput" accept="image/*" hidden>
+                    </div>
+                    <div class="image-preview" id="coverImagePreview">
+                        <img id="coverPreviewImg" src="" alt="غلاف">
+                        <button class="remove-btn" onclick="removeCoverImage()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="actions-row">
+                    <button class="gradient-btn primary" id="convertBtn" onclick="generatePDF()">
+                        <span data-i18n="generateBtn">توليد المستند</span>
+                    </button>
+                    <button class="gradient-btn secondary" id="downloadBtn" onclick="downloadPDF()" style="display:none;">
+                        <span data-i18n="downloadBtn">تحميل PDF</span>
+                    </button>
+                </div>
+
+                <div class="progress-wrap" id="progressContainer">
+                    <div class="progress-track">
+                        <div class="progress-fill" id="progressBar"></div>
+                    </div>
+                    <span class="progress-label" data-i18n="processing">جاري المعالجة...</span>
+                </div>
+
+                <div class="success-state" id="successMessage">
+                    <div class="success-icon">✓</div>
+                    <p data-i18n="successMsg">تم إنشاء الملف بنجاح!</p>
+                </div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="preview-header">
+                    <span class="preview-dot"></span>
+                    <span data-i18n="previewTitle">معاينة الملف</span>
+                </div>
+                <div class="preview-content" id="previewContent">
+                    <div class="preview-placeholder">
+                        <div class="preview-doc">
+                            <div class="doc-line doc-title"></div>
+                            <div class="doc-line"></div>
+                            <div class="doc-line"></div>
+                            <div class="doc-line doc-short"></div>
+                            <div class="doc-image-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                            </div>
+                            <div class="doc-line"></div>
+                            <div class="doc-line"></div>
+                        </div>
+                        <p data-i18n="previewPlaceholder">المحتوى يظهر هنا</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="site-footer">
+            <p>© 2026 <span data-i18n="footerBrand">إيثار</span> — <span data-i18n="footerTag">صُنع بإتقان</span></p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
