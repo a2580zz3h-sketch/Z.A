@@ -221,6 +221,7 @@ function handleServerEvent(data) {
             currentState.totalReacts++;
             localStorage.setItem('totalReacts', currentState.totalReacts);
             document.getElementById('totalReacts').textContent = currentState.totalReacts;
+            bumpStat('totalReacts');
             addLog('reaction', `رياكت بـ ${data.emoji} على ستوري ${data.from}`, data.time);
             if (document.getElementById('soundToggle').checked) playBeep();
             break;
@@ -263,7 +264,13 @@ function setEmoji(emoji) {
     document.getElementById('currentEmoji').textContent = emoji;
     
     document.querySelectorAll('.emoji-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.emoji === emoji);
+        const isActive = btn.dataset.emoji === emoji;
+        btn.classList.toggle('active', isActive);
+        if (isActive) {
+            btn.classList.remove('just-picked');
+            void btn.offsetWidth;
+            btn.classList.add('just-picked');
+        }
     });
     
     fetch('/api/emoji', {
@@ -377,10 +384,58 @@ async function checkSession() {
     }
 }
 
+// Ripple click effect
+function attachRipple(el) {
+    el.addEventListener('click', (e) => {
+        const rect = el.getBoundingClientRect();
+        const ripple = document.createElement('span');
+        const size = Math.max(rect.width, rect.height);
+        ripple.className = 'ripple';
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        el.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 600);
+    });
+}
+
+function initRipples() {
+    document.querySelectorAll('.btn-primary, .btn-icon, .btn-small, .emoji-btn').forEach(el => {
+        el.style.position = el.style.position || 'relative';
+        el.style.overflow = 'hidden';
+        attachRipple(el);
+    });
+}
+
+// Copy pairing code to clipboard
+function copyPairingCode() {
+    const code = document.getElementById('pairingCode').textContent;
+    const btn = document.getElementById('copyCodeBtn');
+    const label = btn.querySelector('.copy-label');
+
+    navigator.clipboard.writeText(code).then(() => {
+        btn.classList.add('copied');
+        label.textContent = 'اتنسخ! ✓';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            label.textContent = 'نسخ الكود';
+        }, 1800);
+    }).catch(() => showToast('مقدرتش أنسخ الكود', 'error'));
+}
+
+// Bump animation whenever a stat value updates
+function bumpStat(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('bump');
+    void el.offsetWidth; // restart animation
+    el.classList.add('bump');
+}
+
 // Init
 document.addEventListener('DOMContentLoaded', () => {
     initParticles();
     checkSession();
+    initRipples();
     
     // Enter key on phone input
     document.getElementById('phoneInput').addEventListener('keypress', (e) => {

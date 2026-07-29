@@ -37,6 +37,9 @@
             <div class="pairing-box hidden" id="pairingBox">
                 <div class="pairing-label">🔑 كود الربط</div>
                 <div class="pairing-code" id="pairingCode">----</div>
+                <button class="copy-code-btn" id="copyCodeBtn" onclick="copyPairingCode()">
+                    <span class="icon">📋</span><span class="copy-label">نسخ الكود</span>
+                </button>
                 <div class="pairing-hint">افتح واتساب > الأجهزة المرتبطة > ربط جهاز > ادخل الكود</div>
                 <div class="countdown" id="countdown">02:00</div>
             </div>
@@ -57,8 +60,8 @@
                     <span class="dot"></span>
                     <span id="connText">غير متصل</span>
                 </div>
-                <button class="btn-icon" onclick="toggleSettings()" title="الإعدادات">⚙️</button>
-                <button class="btn-icon danger" onclick="logout()" title="تسجيل الخروج">🚪</button>
+                <button class="btn-icon" onclick="toggleSettings()" title="الإعدادات"><span>⚙️</span></button>
+                <button class="btn-icon danger" onclick="logout()" title="تسجيل الخروج"><span>🚪</span></button>
             </div>
         </nav>
 
