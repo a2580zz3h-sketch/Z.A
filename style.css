@@ -1,5 +1,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html { color-scheme: light only; }
+
 body {
   font-family: 'Tajawal', sans-serif;
   background: linear-gradient(135deg, #fff0f5 0%, #ffe4ec 30%, #ffcce0 60%, #ffb3d1 100%);
