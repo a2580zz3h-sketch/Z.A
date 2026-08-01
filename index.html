@@ -1,162 +1,89 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KALAHAN — WhatsApp Auto-React</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday Jana 🎀</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="bg-mesh"></div>
-    <div class="particles" id="particles"></div>
+  <div id="app">
+    <nav class="nav-bar">
+      <div class="logo">🎀 Jana's 17th 🎀</div>
+      <div class="nav-links">
+        <button class="nav-btn active" data-page="home">الرئيسية</button>
+        <button class="nav-btn" data-page="balloons">🎈 البالونات</button>
+        <button class="nav-btn" data-page="message">💌 الرسالة</button>
+        <button class="nav-btn" data-page="video">🎬 الفيديو</button>
+      </div>
+    </nav>
 
-    <!-- Login / Connect Screen -->
-    <div class="screen active" id="connectScreen">
-        <div class="glass-card login-card">
-            <div class="logo-area">
-                <div class="logo-ring"></div>
-                <div class="logo-ring delay"></div>
-                <div class="logo-icon">⚡</div>
-            </div>
-            <h1 class="brand">KALAHAN</h1>
-            <p class="subtitle">واتساب اوتو رياكت — رد فعل تلقائي على الستوريات</p>
-            
-            <div class="input-group">
-                <label>📱 رقم التليفون</label>
-                <input type="tel" id="phoneInput" placeholder="مثال: 2010xxxxxxxx" maxlength="15">
-                <span class="input-hint">اكتب الرقم بكود الدولة من غير +</span>
-            </div>
-
-            <button class="btn-primary" id="connectBtn" onclick="requestConnection()">
-                <span class="btn-text">ربط الحساب</span>
-                <span class="btn-loader hidden"></span>
-            </button>
-
-            <div class="pairing-box hidden" id="pairingBox">
-                <div class="pairing-label">🔑 كود الربط</div>
-                <div class="pairing-code" id="pairingCode">----</div>
-                <button class="copy-code-btn" id="copyCodeBtn" onclick="copyPairingCode()">
-                    <span class="icon">📋</span><span class="copy-label">نسخ الكود</span>
-                </button>
-                <div class="pairing-hint">افتح واتساب > الأجهزة المرتبطة > ربط جهاز > ادخل الكود</div>
-                <div class="countdown" id="countdown">02:00</div>
-            </div>
-
-            <div class="status-msg hidden" id="connectStatus"></div>
+    <section id="page-home" class="page active">
+      <div class="home-container">
+        <div class="floating-hearts" id="hearts-container"></div>
+        <div class="birthday-cake">🎂</div>
+        <h1 class="main-title">Happy Birthday</h1>
+        <h2 class="name-title">Jana</h2>
+        <div class="age-badge">17</div>
+        <p class="subtitle">كل سنة وانتي طيبة يا أحلى صحبة وأغلى أخت 🎉</p>
+        <button class="start-btn" onclick="goToPage('balloons')">ابدأي الاحتفال 🎉</button>
+        <div class="decorations">
+          <span class="deco">🎀</span><span class="deco">🌸</span><span class="deco">✨</span>
+          <span class="deco">🎁</span><span class="deco">💖</span><span class="deco">🌷</span>
         </div>
-    </div>
+      </div>
+    </section>
 
-    <!-- Dashboard Screen -->
-    <div class="screen" id="dashboardScreen">
-        <nav class="topbar glass">
-            <div class="nav-brand">
-                <span class="nav-logo">⚡</span>
-                <span>KALAHAN</span>
-            </div>
-            <div class="nav-actions">
-                <div class="connection-badge" id="connBadge">
-                    <span class="dot"></span>
-                    <span id="connText">غير متصل</span>
-                </div>
-                <button class="btn-icon" onclick="toggleSettings()" title="الإعدادات"><span>⚙️</span></button>
-                <button class="btn-icon danger" onclick="logout()" title="تسجيل الخروج"><span>🚪</span></button>
-            </div>
-        </nav>
-
-        <main class="dashboard">
-            <!-- Hero Stats -->
-            <div class="stats-grid">
-                <div class="stat-card glass">
-                    <div class="stat-icon">❤️</div>
-                    <div class="stat-value" id="totalReacts">0</div>
-                    <div class="stat-label">إجمالي الرياكشنات</div>
-                    <div class="stat-glow"></div>
-                </div>
-                <div class="stat-card glass">
-                    <div class="stat-icon">📱</div>
-                    <div class="stat-value" id="phoneDisplay">---</div>
-                    <div class="stat-label">الرقم المربوط</div>
-                    <div class="stat-glow pink"></div>
-                </div>
-                <div class="stat-card glass">
-                    <div class="stat-icon">⏱️</div>
-                    <div class="stat-value" id="uptimeDisplay">0s</div>
-                    <div class="stat-label">وقت التشغيل</div>
-                    <div class="stat-glow cyan"></div>
-                </div>
-            </div>
-
-            <!-- Emoji Picker -->
-            <div class="section glass">
-                <h2 class="section-title">🎭 اختار إيموجي الرياكشن</h2>
-                <div class="emoji-grid" id="emojiGrid">
-                    <button class="emoji-btn active" data-emoji="❤️" onclick="setEmoji('❤️')">❤️</button>
-                    <button class="emoji-btn" data-emoji="🔥" onclick="setEmoji('🔥')">🔥</button>
-                    <button class="emoji-btn" data-emoji="😂" onclick="setEmoji('😂')">😂</button>
-                    <button class="emoji-btn" data-emoji="🥵" onclick="setEmoji('🥵')">🥵</button>
-                    <button class="emoji-btn" data-emoji="💯" onclick="setEmoji('💯')">💯</button>
-                    <button class="emoji-btn" data-emoji="😍" onclick="setEmoji('😍')">😍</button>
-                    <button class="emoji-btn" data-emoji="👏" onclick="setEmoji('👏')">👏</button>
-                    <button class="emoji-btn" data-emoji="🚀" onclick="setEmoji('🚀')">🚀</button>
-                    <button class="emoji-btn" data-emoji="✨" onclick="setEmoji('✨')">✨</button>
-                    <button class="emoji-btn" data-emoji="💀" onclick="setEmoji('💀')">💀</button>
-                    <button class="emoji-btn" data-emoji="🐐" onclick="setEmoji('🐐')">🐐</button>
-                    <button class="emoji-btn custom" onclick="setCustomEmoji()" id="customEmojiBtn">+</button>
-                </div>
-                <div class="current-emoji-display">
-                    <span>الإيموجي الحالي:</span>
-                    <span class="big-emoji" id="currentEmoji">❤️</span>
-                </div>
-            </div>
-
-            <!-- Activity Log -->
-            <div class="section glass log-section">
-                <div class="section-header">
-                    <h2 class="section-title">📜 سجل النشاط</h2>
-                    <button class="btn-small" onclick="clearLogs()">مسح</button>
-                </div>
-                <div class="log-container" id="logContainer">
-                    <div class="log-empty">مفيش نشاط لسه... الرياكشنات هتظهر هنا اول ما تبدأ</div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Settings Modal -->
-    <div class="modal hidden" id="settingsModal">
-        <div class="modal-overlay" onclick="toggleSettings()"></div>
-        <div class="modal-content glass">
-            <h3>الإعدادات</h3>
-            <div class="setting-row">
-                <span>🔔 إشعارات المتصفح</span>
-                <label class="toggle">
-                    <input type="checkbox" id="notifToggle" onchange="toggleNotifications()">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="setting-row">
-                <span>📖 قراءة الستوري تلقائي</span>
-                <label class="toggle">
-                    <input type="checkbox" id="readToggle" checked onchange="toggleAutoRead()">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="setting-row">
-                <span>🎵 صوت الإشعارات</span>
-                <label class="toggle">
-                    <input type="checkbox" id="soundToggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <button class="btn-primary" onclick="toggleSettings()">تمام</button>
+    <section id="page-balloons" class="page">
+      <div class="balloons-container">
+        <h2 class="page-title">🎈 اضغطي على 17 بالونة!</h2>
+        <div class="counter">تم تفجير: <span id="pop-count">0</span> / 17</div>
+        <div class="balloons-grid" id="balloons-grid"></div>
+        <div class="celebration hidden" id="celebration">
+          <div class="celebration-box">
+            <div class="celebration-text">🎉🎂🎉</div>
+            <h1>Happy 17th Birthday Jana!</h1>
+            <div class="fireworks" id="fireworks"></div>
+            <button class="close-celebration" id="close-celebration">🎁 المفاجأة الجاية</button>
+          </div>
         </div>
+      </div>
+    </section>
+
+    <section id="page-message" class="page">
+      <div class="message-container">
+        <div class="envelope" id="envelope">
+          <div class="envelope-flap"></div>
+          <div class="envelope-body"></div>
+          <div class="click-hint" id="click-hint">✨ اضغطي لفتح الرسالة ✨</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="letter-modal hidden" id="letter-modal">
+      <div class="letter-card">
+        <button class="close-letter" id="close-letter">✕</button>
+        <h3>💌 إلى جنا</h3>
+        <p>كل سنة وانتي طيبة وبصحة وسعادة</p>
+        <p>دي هدية بسيطة مني</p>
+        <p>أسف ده اللي أقدر أقدمه في الوقت الحالي</p>
+        <p>كل سنة وانتي طيبة</p>
+        <p>وينعاد عليكي بألف خير وصحة وسلامة ونجاح</p>
+        <div class="signature">مبارك 🎀</div>
+      </div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <script src="script.js"></script>
+    <section id="page-video" class="page">
+      <div class="video-container">
+        <h2 class="page-title">🎬 أغنية خاصة لجنا</h2>
+        <div class="video-wrapper">
+          <iframe id="yt-player" data-src="https://www.youtube.com/embed/b1Fa9Aqh4kU?autoplay=0&loop=1&playlist=b1Fa9Aqh4kU&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <div class="video-message">✨ أطيب الأمنيات ليكي يا جميلة ✨</div>
+      </div>
+    </section>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
